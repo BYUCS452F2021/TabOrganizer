@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>{{ defaultText }}</p>
+    <p>{{ defaultText }} HelloWorld!</p>
   </div>
 </template>
 
