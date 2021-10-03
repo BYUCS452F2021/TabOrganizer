@@ -33,12 +33,12 @@ try:
         print(connection)
         create_user_query = """CREATE TABLE IF NOT EXISTS USER(
                                 UserID INT AUTO_INCREMENT PRIMARY KEY,
-                                UserName VARCHAR(100) NOT NULL,
+                                UserName VARCHAR(100) UNIQUE NOT NULL,
                                 Password VARCHAR(100) NOT NULL
                                 )"""
         create_folder_query = """CREATE TABLE IF NOT EXISTS FOLDER(
                                 FolderID INT AUTO_INCREMENT PRIMARY KEY,
-                                UserID INT NOT NULL,
+                                UserID INT NOT NULL FOREIGN KEY,
                                 FolderName VARCHAR(100) NOT NULL,
                                 DateUpdated DATE NOT NULL
                                 )"""
