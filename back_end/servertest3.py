@@ -10,8 +10,9 @@ from mysql.connector import connect, Error
 app = Flask(__name__)
 api = Api(app)
 # https://www.codementor.io/@sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq
-connection = connect( host="localhost", user="root", password='', database="TabOrganizer")
+connection = connect( host="localhost", user="root", password="password", database="TabOrganizer")
 
+#All Classes expect a JSON file with the required information. We can test this right now using PostMan or similar programs.
 
 class User(Resource):
     # Login (returns userid if valid else returns -1)
@@ -53,26 +54,6 @@ class User(Resource):
                 print('Username taken')
                 return -1
 
-
-# returns all folders for a given user
-class UserFolders(Resource):
-    def get(self, UserID):
-        get_user_folder_query = "SELECT * FROM FOLDER WHERE USERID = " + UserID
-        with connection.cursor() as cursor:
-            cursor.execute(get_user_folder_query)
-            folders = cursor.fetchall()
-            print(folders)
-            return {'user folders': [i for i in folders]}
-
-# returns items for a given user
-class UserFolderItems(Resource):
-    def get(self, UserID):
-        get_user_folder_query = "SELECT * FROM ITEM JOIN FOLDER ON ITEM.FOLDERID = FOLDER.FOLDERID WHERE FOLDER.USERID = " + UserID
-        with connection.cursor() as cursor:
-            cursor.execute(get_user_folder_query)
-            folders = cursor.fetchall()
-            print(folders)
-            return {'user items': [i for i in folders]}
 
 
 class Item(Resource):
@@ -120,6 +101,67 @@ class UpdateItem(Resource):
             connection.commit()
             return 1
 
+# returns items for a given user
+class UserFolderItems(Resource):
+    def get(self, UserID):
+        get_user_folder_query = "SELECT * FROM ITEM JOIN FOLDER ON ITEM.FOLDERID = FOLDER.FOLDERID WHERE FOLDER.USERID = " + UserID
+        with connection.cursor() as cursor:
+            cursor.execute(get_user_folder_query)
+            folders = cursor.fetchall()
+            print(folders)
+            return {'user items': [i for i in folders]}
+
+
+
+#Adds a Folder to the Databse
+class AddFolder(Resource):
+    def post(self):
+        json_data = request.get_json(force=True)
+        folder_name = json_data['FolderName']
+        folder_updated = json_data['DateUpdated']
+        user_id = json_data['UserID']
+
+        with connection.cursor(buffered=True) as cursor:
+            cursor.execute("""INSERT INTO folder(FolderName, DateUpdated, UserID) VALUES (%s, %s, %s)""",(folder_name, folder_updated, user_id))
+            connection.commit()
+            cursor.execute("""SELECT last_insert_id()""")
+            folderid = cursor.fetchone()
+            return folderid[0]
+
+#Gets all Folders for a given User
+class GetFolder(Resource):
+    def get(self, UserID):
+        get_user_folder_query = "SELECT * FROM FOLDER WHERE USERID = " + UserID
+        with connection.cursor() as cursor:
+            cursor.execute(get_user_folder_query)
+            folders = cursor.fetchall()
+            print(folders)
+            return {'user folders': [i for i in folders]}
+
+#Deletes a Folder from the Database
+class DeleteFolder(Resource):
+    def post(self):
+        json_data = request.get_json(force=True)
+        folder_id = json_data['FolderID']
+
+        with connection.cursor(buffered=True) as cursor:
+            cursor.execute("""DELETE FROM folder WHERE FolderID=%s""",(folder_id,))
+            connection.commit()
+            return 1
+
+#Updates a Folder Name on the Database
+class UpdateFolder(Resource):
+    # Update Item Name
+    def post(self):
+        json_data = request.get_json(force=True)
+        folder_id = json_data['FolderID']
+        folder_name = json_data['FolderName']
+
+        with connection.cursor(buffered=True) as cursor:
+            cursor.execute("""UPDATE folder SET FolderName = %s WHERE folderID = %s;""",(folder_name, folder_id))
+            connection.commit()
+            return 1
+
 # Debugging Methods
 # returns all users
 class Users(Resource):
@@ -146,13 +188,21 @@ class Items(Resource):
             return {'items': [i for i in items]}
 
 # Make Paths
+
+#User Paths
 api.add_resource(User, '/user') # Register and Login
+
+#Item Paths
 api.add_resource(Item, '/item') # Add item
+api.add_resource(UserFolderItems, '/useritems/<UserID>') # currently doest work, use JSON instead
 api.add_resource(DeleteItem, '/deleteitem') # Delete item
 api.add_resource(UpdateItem, '/updateitem') # Update item
 
-api.add_resource(UserFolders, '/userfolders/<UserID>') # currently doest work, use JSON instead
-api.add_resource(UserFolderItems, '/useritems/<UserID>') # currently doest work, use JSON instead
+#Folder Paths
+api.add_resource(AddFolder, '/addfolder') # Add Folder
+api.add_resource(GetFolder, '/userfolders/<UserID>') # currently doest work, use JSON instead
+api.add_resource(DeleteItem, '/deletefolder') # Delete Folder
+api.add_resource(UpdateItem, '/updatefolder') # Update Folder Name
 
 # For debugging
 api.add_resource(Users, '/users')
