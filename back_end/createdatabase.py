@@ -32,22 +32,26 @@ try:
     ) as connection:
         print(connection)
         create_user_query = """CREATE TABLE IF NOT EXISTS USER(
-                                UserID INT AUTO_INCREMENT PRIMARY KEY,
+                                UserID INT AUTO_INCREMENT,
                                 UserName VARCHAR(100) UNIQUE NOT NULL,
-                                Password VARCHAR(100) NOT NULL
+                                Password VARCHAR(100) NOT NULL,
+                                PRIMARY KEY (UserID)
                                 )"""
         create_folder_query = """CREATE TABLE IF NOT EXISTS FOLDER(
-                                FolderID INT AUTO_INCREMENT PRIMARY KEY,
-                                UserID INT NOT NULL FOREIGN KEY,
+                                FolderID INT AUTO_INCREMENT,
+                                UserID INT NOT NULL,
                                 FolderName VARCHAR(100) NOT NULL,
-                                DateUpdated DATE NOT NULL
+                                DateUpdated DATE NOT NULL,
+                                PRIMARY KEY (FolderID),
+                                FOREIGN KEY (UserID) REFERENCES User(UserID)
                                 )"""
         create_item_query = """CREATE TABLE IF NOT EXISTS ITEM(
-                                ItemID INT AUTO_INCREMENT PRIMARY KEY,
+                                ItemID INT AUTO_INCREMENT,
                                 FolderID INT NOT NULL,
                                 ItemName VARCHAR(100) NOT NULL,
                                 ItemUrl VARCHAR(255) NOT NULL,
-                                ItemIcon VARCHAR(255)
+                                ItemIcon VARCHAR(255),
+                                PRIMARY KEY (ItemID)
                                 )"""
 
 
