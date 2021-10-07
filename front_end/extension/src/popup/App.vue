@@ -1,14 +1,18 @@
 <template>
-  <hello-world />
+  <div id="app">
+    <router-view />
+  </div>
 </template>
 
 <script>
-import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
-  name: 'App',
-  components: { HelloWorld }
-}
+  async created() {
+    //TODO: check if logged in, if so push /account
+
+    //else...
+    this.$router.push("/");
+  }
+};
 </script>
 
 <style>

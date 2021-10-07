@@ -2,17 +2,18 @@
   "manifest_version": 2,
   "name": "__MSG_extName__",
   "homepage_url": "http://localhost:8080/",
-  "description": "A Vue Browser Extension",
+  "description": "Tab Organizer",
   "default_locale": "en",
   "permissions": [
-    "activeTab",
+    "tabs",
+    "storage",
     "<all_urls>",
     "*://*/*"
   ],
   "icons": {
-    "16": "icons/16.png",
-    "48": "icons/48.png",
-    "128": "icons/128.png"
+    "16": "icons/tab_icon.png",
+    "48": "icons/tab_icon.png",
+    "128": "icons/tab_icon.png"
   },
   "background": {
     "scripts": [
@@ -24,8 +25,8 @@
     "default_popup": "popup.html",
     "default_title": "__MSG_extName__",
     "default_icon": {
-      "19": "icons/19.png",
-      "38": "icons/38.png"
+      "19": "icons/tab_icon.png",
+      "38": "icons/tab_icon.png"
     }
   }
 }
