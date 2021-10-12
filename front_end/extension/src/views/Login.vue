@@ -1,9 +1,9 @@
 <template>
   <div class="login">
-    <h1>Tab Organizer</h1>
-    <h2>Login</h2>
+    <div class="app_name">Tab Organizer</div>
 
     <form id="loginForm">
+      <!-- <h3>Login</h3> -->
       <div class="field">
         <label for="username">Username:</label><br />
         <input type="text" id="username" name="username" /><br />
@@ -74,10 +74,17 @@ export default {
   position: relative;
 }
 
+.app_name {
+  font-family: 'Architects Daughter', cursive;
+  padding-top: 25px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
 form {
   color: #000000;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 18px;
   margin-top: 30px;
 }
 input {
@@ -88,6 +95,7 @@ input {
 .field {
   padding: 5px;
   margin-bottom: 10px;
+  font-family: 'Architects Daughter', cursive;
 }
 .fail {
   font-size: 10px;
@@ -118,4 +126,7 @@ input {
   color: blue;
   font-size: 12px;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
 </style>
