@@ -103,18 +103,19 @@ input {
   padding: 2px;
 }
 .loginButton {
-  background: blue;
+  background: lightblue;
   text-align: center;
   padding: 10px;
   margin: 20px 0px 30px 0px;
   box-shadow: 0.1em 0.1em 0.1em rgba(0, 0, 0, 0.3);
   border-radius: 25px;
-  color: white;
+  color: black;
   width: 120px;
   font-size: 15px;
 }
 .loginButton:hover {
   background: #899fa3;
+  color: white;
 }
 .registerLink {
   text-decoration: none;
@@ -123,7 +124,7 @@ input {
 }
 .registerLink:hover {
   text-decoration: none;
-  color: blue;
+  color: lightblue;
   font-size: 12px;
 }
 

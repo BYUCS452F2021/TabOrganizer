@@ -28,13 +28,44 @@
       </div>
 
       <div class="registerButton" id="registerButton" @click="register">
-        register
+        Register
       </div>
     </div>
   </div>
 </template>
 
 <script>
+export default {
+  name: 'Register',
+  data() {
+    return {
+      registerFail: false,
+    };
+  },
+  methods: {
+    async register() {
+      //get user input of username and password
+      this.registerFail = false;
+      const userPassword = document.getElementById("pwd").value;
+      const userName = document.getElementById("username").value;
+
+      console.log(userName + " " + userPassword)
+      
+      //call register api here
+
+      //if login successful then set userId locally and push route
+      chrome.storage.local.set({ userId: "someUserId" });
+      this.$router.push("/account");
+
+      //else if unsuccessful
+      /*
+      document.getElementById("registerForm").reset();
+      this.registerFail = true;
+      */
+
+    },
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -87,18 +118,19 @@ input {
 }
 
 .registerButton {
-  background: blue;
+  background: lightblue;
   text-align: center;
   padding: 10px;
   margin: 20px 0px 30px 0px;
   box-shadow: 0.1em 0.1em 0.1em rgba(0, 0, 0, 0.3);
   border-radius: 25px;
-  color: white;
+  color: black;
   width: 120px;
   font-size: 15px;
 }
 .registerButton:hover {
   background: #899fa3;
+  color: white;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
