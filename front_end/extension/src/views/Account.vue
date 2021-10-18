@@ -1,23 +1,23 @@
 <template>
   <div class="account">
-    <h1>My Tabs</h1>
+    <div class="account_header">My Tabs</div>
 
     <div id="box" class="scrollBox">
       <div v-for="folder in folders" :key="folder.folderId">
         <div class="folderRow">
-          <img src="icons/arrow.png" class="arrow" width="26" height="26" @click="openFolder(folder)">
+          <img src="icons/folder.png" style="float: left; padding-right: 20px" class="arrow" width="26" height="26" @click="openFolder(folder)">
           {{folder.folderName}}
-          <img src="icons/arrow.png" class="arrow" width="26" height="26" @click="revealFolderContents(folder)">
-          <img src="icons/arrow.png" class="arrow" width="26" height="26">
+          <img src="icons/down-arrow.png" class="down-arrow" width="26" height="26" @click="revealFolderContents(folder)">
+          <img src="icons/trash.png" class="trash" width="26" height="26">
         </div>
         <div class="itemView" :id="folder.folderId">
           <div v-for="item in folder.folderContents" :key="item">
             <div class="itemRow">
-              <img :src="item.itemIcon" class="arrow" width="26" height="26">
-              <p>{{ item.itemName }}</p>
-              <p>{{ item.itemUrl }}></p>
-              <img src="icons/tab_icon.png" class="arrow" width="26" height="26">
-              <img src="icons/tab_icon.png" class="arrow" width="26" height="26">
+              <img :src="item.itemIcon" class="item_img" width="26" height="26">
+              <div class="itemName">{{ item.itemName }}</div>
+              <div class="itemUrl">{{ item.itemUrl }}></div>
+              <img src="icons/pen.png" class="item_pen" width="20" height="20">
+              <img src="icons/trash.png" class="item_trash" width="20" height="20">
             </div>
           </div>
         </div>
@@ -25,8 +25,8 @@
     </div>
 
     <div class="addFolder">
-      <img src="icons/tab_icon.png" class="addButton" width="26" height="26" @click="addFolder">
-      Add Folder
+      <img src="icons/add.png" class="addButton" width="18" height="18" @click="addFolder">
+      <div class="addFolderText"> Add Folder</div>
     </div>
 
     <div class="addFolderOverlay" v-show="createNewFolderOverlay">
@@ -131,6 +131,43 @@ export default {
   position: relative;
 }
 
+.down-arrow {
+  float: right; 
+  display: block;
+  margin-left: auto;
+}
+
+.trash {
+  float: right;
+  display: block; 
+  margin-left: 20px;
+}
+
+.item_pen {
+  float: right; 
+  display: block;
+  margin-left: auto;
+}
+
+.item_trash {
+  float: right;
+  display: block; 
+  margin-left: 10px;
+  margin-right: 5px;
+}
+
+.account_header {
+  font-family: 'Architects Daughter', cursive;
+  font-weight: bold;
+  font-size: 30px;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.addFolderText{
+  font-size: 18px;
+}
+
 .scrollBox {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -140,7 +177,8 @@ export default {
 .folderRow {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  //justify-content: space-between;
+  //margin: 25px 10px;
   padding: 10px;
   width: 300px;
 }
@@ -158,7 +196,7 @@ export default {
 .itemRow {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  //justify-content: space-between;
 }
 
 .itemRow p {
@@ -177,21 +215,22 @@ export default {
 }
 
 .addButton {
-  margin-right: 15px;
+  margin-right: 5px;
   width: 30px;
   height: 30px;
-  padding: 5px;
   border-radius: 70px;
 }
 
-.addButton:Hover {
-  margin-right: 15px;
-  width: 30px;
-  height: 30px;
+.itemName {
+  width: 50px;
   padding: 5px;
-  border-radius: 70px;
-  box-shadow: 0.015em 0.015em 0.015em rgba(0, 0, 0, 0.3);
-  background-color: lightblue;
+  overflow: hidden;
+}
+
+.itemUrl {
+  width: 130px;
+  padding: 3px;
+  overflow: hidden;
 }
 
 .addFolderOverlay {
