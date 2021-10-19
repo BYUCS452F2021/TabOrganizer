@@ -55,8 +55,8 @@ class User(Resource):
                 return -1
 
 
-
-class Item(Resource):
+#Add an Item
+class AddItem(Resource):
     # Add Item (add item and return id)
     def post(self):
         json_data = request.get_json(force=True)
@@ -66,7 +66,7 @@ class Item(Resource):
         item_icon = json_data['ItemIcon']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""SELECT * FROM FOLDER WHERE FolderID=%s""",(folder_id,))
+            cursor.execute("""SELECT * FROM FOLDER WHERE FolderID=%s""",(folder_id))
             checkFolder = cursor.fetchone()
             if checkFolder is None:
                 print("Folder doesn't exist")
@@ -78,6 +78,16 @@ class Item(Resource):
                 userid = cursor.fetchone()
                 return userid[0]
 
+# returns items for a given folder
+class GetItems(Resource):
+    def get(self):
+        json_data = request.get_json(force=True)
+        folder_id = json_data['FolderID']
+        with connection.cursor() as cursor:
+            cursor.execute("""SELECT * FROM folder WHERE FOLDERID = """ + folder_id)
+            items = cursor.fetchall()
+            return {'user items': [i for i in items]}
+
 class DeleteItem(Resource):
     # Delete Item (remove item)
     def post(self):
@@ -85,7 +95,7 @@ class DeleteItem(Resource):
         item_id = json_data['ItemID']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""DELETE FROM ITEM WHERE ItemID=%s""",(item_id,))
+            cursor.execute("""DELETE FROM ITEM WHERE ItemID = """ + item_id)
             connection.commit()
             return 1
 
@@ -101,15 +111,7 @@ class UpdateItem(Resource):
             connection.commit()
             return 1
 
-# returns items for a given user
-class UserFolderItems(Resource):
-    def get(self, UserID):
-        get_user_folder_query = "SELECT * FROM ITEM JOIN FOLDER ON ITEM.FOLDERID = FOLDER.FOLDERID WHERE FOLDER.USERID = " + UserID
-        with connection.cursor() as cursor:
-            cursor.execute(get_user_folder_query)
-            folders = cursor.fetchall()
-            print(folders)
-            return {'user items': [i for i in folders]}
+
 
 
 
@@ -130,13 +132,14 @@ class AddFolder(Resource):
 
 #Gets all Folders for a given User
 class GetFolder(Resource):
-    def get(self, UserID):
-        get_user_folder_query = "SELECT * FROM FOLDER WHERE USERID = " + UserID
+    def get(self):
+        json_data = request.get_json(force=True)
+        user_id = json_data['UserID']
+        # get_user_folder_query = "" + UserID
         with connection.cursor() as cursor:
-            cursor.execute(get_user_folder_query)
+            cursor.execute("""SELECT * FROM FOLDER WHERE USERID =""" + user_id)
             folders = cursor.fetchall()
-            print(folders)
-            return {'user folders': [i for i in folders]}
+            return {'folders': [i for i in folders]}
 
 #Deletes a Folder from the Database
 class DeleteFolder(Resource):
@@ -193,16 +196,16 @@ class Items(Resource):
 api.add_resource(User, '/user') # Register and Login
 
 #Item Paths
-api.add_resource(Item, '/item') # Add item
-api.add_resource(UserFolderItems, '/useritems/<UserID>') # currently doest work, use JSON instead
+api.add_resource(AddItem, '/additem') # Add item
+api.add_resource(GetItems, '/useritems') # Get Items from Folder
 api.add_resource(DeleteItem, '/deleteitem') # Delete item
 api.add_resource(UpdateItem, '/updateitem') # Update item
 
 #Folder Paths
 api.add_resource(AddFolder, '/addfolder') # Add Folder
-api.add_resource(GetFolder, '/userfolders/<UserID>') # currently doest work, use JSON instead
-api.add_resource(DeleteItem, '/deletefolder') # Delete Folder
-api.add_resource(UpdateItem, '/updatefolder') # Update Folder Name
+api.add_resource(GetFolder, '/userfolders') # currently doest work, use JSON instead
+api.add_resource(DeleteFolder, '/deletefolder') # Delete Folder
+api.add_resource(UpdateFolder, '/updatefolder') # Update Folder Name
 
 # For debugging
 api.add_resource(Users, '/users')

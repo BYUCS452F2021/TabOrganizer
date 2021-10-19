@@ -41,7 +41,7 @@ try:
                                 FolderID INT AUTO_INCREMENT,
                                 UserID INT NOT NULL,
                                 FolderName VARCHAR(100) NOT NULL,
-                                DateUpdated DATE NOT NULL,
+                                DateUpdated VARCHAR(100) NOT NULL,
                                 PRIMARY KEY (FolderID),
                                 FOREIGN KEY (UserID) REFERENCES User(UserID)
                                 )"""
