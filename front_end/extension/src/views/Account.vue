@@ -5,17 +5,19 @@
     <div id="box" class="scrollBox">
       <div v-for="folder in folders" :key="folder.folderId">
         <div class="folderRow">
-          <img src="icons/folder.png" style="float: left; padding-right: 20px" class="arrow" width="26" height="26" @click="openFolder(folder)">
-          {{folder.folderName}}
-          <img src="icons/down-arrow.png" class="down-arrow" width="26" height="26" @click="revealFolderContents(folder)">
+          <img src="icons/folder.png" class="folderIcon" width="26" height="26" @click="openFolder(folder)">
+          <h2>{{folder.folderName}}</h2>
+          <img src="icons/down-arrow.png" class="down-arrow" :id="'reveal_contents:'+folder.folderId" width="26" height="26" @click="revealFolderContents(folder)">
           <img src="icons/trash.png" class="trash" width="26" height="26">
         </div>
         <div class="itemView" :id="folder.folderId">
           <div v-for="item in folder.folderContents" :key="item">
             <div class="itemRow">
-              <img :src="item.itemIcon" class="item_img" width="26" height="26">
-              <div class="itemName">{{ item.itemName }}</div>
-              <div class="itemUrl">{{ item.itemUrl }}></div>
+              <img :src="item.itemIcon" class="item_img" width="20" height="20">
+              <div class="itemNameColumn">
+                <strong>{{ item.itemName }}</strong>
+                <a :href="item.itemUrl">{{ item.itemUrl }}></a>
+              </div>
               <img src="icons/pen.png" class="item_pen" width="20" height="20">
               <img src="icons/trash.png" class="item_trash" width="20" height="20">
             </div>
@@ -55,7 +57,7 @@ export default {
   },
   async created() {
     this.folders = [{folderId: 1, folderName: "folder1", folderContents: [{
-        itemName: "thing1",
+        itemName: "XFall 2021 - Winter 2022 - Google Drive",
         itemIcon: "icons/arrow.png",
         itemUrl: "https://en.wikipedia.org/wiki/Potato",
       },
@@ -67,8 +69,12 @@ export default {
     revealFolderContents(folder) {
       if (document.getElementById(folder.folderId).style.display === "block") {
         document.getElementById(folder.folderId).style.display = "none";
+        document.getElementById("reveal_contents:" + folder.folderId).className = "down-arrow";
+        //close
       } else {
         document.getElementById(folder.folderId).style.display = "block";
+        //open
+        document.getElementById("reveal_contents:" + folder.folderId).className = "rotate-down-arrow";
       }
     },
     addFolder() {
@@ -135,25 +141,14 @@ export default {
   float: right; 
   display: block;
   margin-left: auto;
+  transform: rotate(-90deg);
 }
 
-.trash {
-  float: right;
-  display: block; 
-  margin-left: 20px;
-}
-
-.item_pen {
+.rotate-down-arrow {
   float: right; 
   display: block;
   margin-left: auto;
-}
-
-.item_trash {
-  float: right;
-  display: block; 
-  margin-left: 10px;
-  margin-right: 5px;
+  transform: rotate(0deg);
 }
 
 .account_header {
@@ -166,6 +161,7 @@ export default {
 
 .addFolderText{
   font-size: 18px;
+  align-items: center;
 }
 
 .scrollBox {
@@ -177,10 +173,17 @@ export default {
 .folderRow {
   display: flex;
   flex-direction: row;
+  align-items: center;
   //justify-content: space-between;
   //margin: 25px 10px;
   padding: 10px;
   width: 300px;
+}
+
+.folderRow h2 {
+  overflow-wrap: break-word;
+  width: 150px;
+  text-align: start;
 }
 
 .itemView {
@@ -196,35 +199,37 @@ export default {
 .itemRow {
   display: flex;
   flex-direction: row;
+  align-items: center;
   //justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.itemRow p {
+.itemNameColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-left: 10px;
+  margin-right: 10px;
   overflow: hidden;
-  width: 50px;
+  width: 200px;
+  white-space: nowrap;
+}
+
+.itemNameColumn strong{
+  white-space: nowrap;
+  width: 2000px;
 }
 
 .addFolder {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   font-size: 25px;
   width: 200px;
   font-family: 'Architects Daughter', cursive;
   margin-top: 20px;
-}
-
-.addButton {
-  margin-right: 5px;
-  width: 30px;
-  height: 30px;
-  border-radius: 70px;
-}
-
-.itemName {
-  width: 50px;
-  padding: 5px;
-  overflow: hidden;
 }
 
 .itemUrl {
@@ -248,7 +253,7 @@ export default {
   border-style: solid;
   background-color: white;
   font-size: 20px;
-  box-shadow: 0.1em 0.1em 0.1em rgba(0, 0, 0, 0.3);
+  box-shadow: 0.3em 0.3em 0.3em rgba(0, 0, 0, 0.7);
 }
 
 form {
@@ -274,9 +279,69 @@ input {
   font-size: 15px;
   margin-top: 15px;
 }
+
 .enterNameButton:hover {
   background: #899fa3;
   color: white;
+}
+
+.folderIcon {
+  float: left;
+  margin-right: 20px;
+  padding: 10px;
+  border-radius: 40%;
+}
+
+.folderIcon:hover {
+  background: lightblue;
+}
+
+.item_pen {
+  float: right; 
+  display: block;
+  margin-left: auto;
+  border-radius: 40%;
+  padding: 5px;
+}
+
+.item_pen:hover {
+  background: lightblue;
+}
+
+.item_trash {
+  float: right;
+  display: block; 
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 40%;
+  padding: 5px;
+}
+
+.item_trash:hover {
+  background: lightcoral;
+}
+
+.trash {
+  float: right;
+  display: block; 
+  margin-left: 20px;
+  border-radius: 40%;
+  padding: 10px;
+}
+
+.trash:hover {
+  background: lightcoral;
+}
+
+.addButton {
+  margin-right: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 70px;
+}
+
+.addButton:hover {
+  background: lightblue;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');

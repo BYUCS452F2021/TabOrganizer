@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import {register} from "../ServerFacade"
 export default {
   name: 'Register',
   data() {
@@ -52,16 +53,18 @@ export default {
       console.log(userName + " " + userPassword)
       
       //call register api here
+      let userId = await register(userName, userPassword);
 
-      //if login successful then set userId locally and push route
-      chrome.storage.local.set({ userId: "someUserId" });
+      //if register is unsuccessful
+      if (userId === -1) {
+        document.getElementById("registerForm").reset();
+        this.registerFail = true;
+        return;
+      }
+
+      //if register successful then set userId locally and push route
+      chrome.storage.local.set({ userId: userId });
       this.$router.push("/account");
-
-      //else if unsuccessful
-      /*
-      document.getElementById("registerForm").reset();
-      this.registerFail = true;
-      */
 
     },
   }

@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import {login} from "../ServerFacade"
 export default {
   name: 'Login',
   data() {
@@ -50,16 +51,18 @@ export default {
       console.log(userName + " " + userPassword)
       
       //call login api here
+      let userId = await login(userName, userPassword);
 
-      //if login successful then set userId locally and push route
-      chrome.storage.local.set({ userId: "someUserId" });
+      //if login is unsuccessful
+      if (userId === -1) {
+        document.getElementById("loginForm").reset();
+        this.loginFail = true;
+        return;
+      }
+
+      //if register successful then set userId locally and push route
+      chrome.storage.local.set({ userId: userId });
       this.$router.push("/account");
-
-      //else if unsuccessful
-      /*
-      document.getElementById("loginForm").reset();
-      this.loginFail = true;
-      */
 
     },
   }
