@@ -9,14 +9,13 @@ from mysql.connector import connect, Error
 
 app = Flask(__name__)
 api = Api(app)
-# https://www.codementor.io/@sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq
 connection = connect( host="localhost", user="root", password="password", database="TabOrganizer")
 
-#All Classes expect a JSON file with the required information. We can test this right now using PostMan or similar programs.
+# All Classes expect a JSON file with the required information.
 
-class User(Resource):
+class Login(Resource):
     # Login (returns userid if valid else returns -1)
-    def get(self):
+    def post(self):
         json_data = request.get_json(force=True)
         username = json_data['username']
         password = json_data['password']
@@ -32,7 +31,7 @@ class User(Resource):
             print('Logged In!', checkUsername)
             return checkUsername[0]
 
-
+class Register(Resource):
     # Add User (register, return userid)
     def post(self):
         json_data = request.get_json(force=True)
@@ -80,7 +79,7 @@ class AddItem(Resource):
 
 # returns items for a given folder
 class GetItems(Resource):
-    def get(self):
+    def post(self):
         json_data = request.get_json(force=True)
         folder_id = json_data['FolderID']
         with connection.cursor() as cursor:
@@ -114,7 +113,6 @@ class UpdateItem(Resource):
 
 
 
-
 #Adds a Folder to the Databse
 class AddFolder(Resource):
     def post(self):
@@ -132,7 +130,7 @@ class AddFolder(Resource):
 
 #Gets all Folders for a given User
 class GetFolder(Resource):
-    def get(self):
+    def post(self):
         json_data = request.get_json(force=True)
         user_id = json_data['UserID']
         # get_user_folder_query = "" + UserID
@@ -193,7 +191,8 @@ class Items(Resource):
 # Make Paths
 
 #User Paths
-api.add_resource(User, '/user') # Register and Login
+api.add_resource(Register, '/register') # Register
+api.add_resource(Login, '/login') # Login
 
 #Item Paths
 api.add_resource(AddItem, '/additem') # Add item
@@ -203,7 +202,7 @@ api.add_resource(UpdateItem, '/updateitem') # Update item
 
 #Folder Paths
 api.add_resource(AddFolder, '/addfolder') # Add Folder
-api.add_resource(GetFolder, '/userfolders') # currently doest work, use JSON instead
+api.add_resource(GetFolder, '/userfolders')
 api.add_resource(DeleteFolder, '/deletefolder') # Delete Folder
 api.add_resource(UpdateFolder, '/updatefolder') # Update Folder Name
 
