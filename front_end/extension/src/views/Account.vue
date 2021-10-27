@@ -8,10 +8,10 @@
           <img src="icons/folder.png" class="folderIcon" width="26" height="26" @click="openFolder(folder)">
           <h2>{{folder.folderName}}</h2>
           <img src="icons/down-arrow.png" class="down-arrow" :id="'reveal_contents:'+folder.folderId" width="26" height="26" @click="revealFolderContents(folder)">
-          <img src="icons/trash.png" class="trash" width="26" height="26">
+          <img src="icons/trash.png" class="trash" width="26" height="26" @click="deleteFolder(folder)">
         </div>
         <div class="itemView" :id="folder.folderId">
-          <div v-for="item in folder.folderContents" :key="item">
+          <div v-for="item in folder.folderContents" :key="item.itemId">
             <div class="itemRow">
               <img :src="item.itemIcon" class="item_img" width="20" height="20">
               <div class="itemNameColumn">
@@ -19,7 +19,7 @@
                 <a :href="item.itemUrl">{{ item.itemUrl }}></a>
               </div>
               <img src="icons/pen.png" class="item_pen" width="20" height="20">
-              <img src="icons/trash.png" class="item_trash" width="20" height="20">
+              <img src="icons/trash.png" class="item_trash" width="20" height="20" @click="deleteItem(folder, item)">
             </div>
           </div>
         </div>
@@ -47,23 +47,29 @@
 </template>
 
 <script>
+import {addFolder, addItem, getFolders, getItems, deleteFolder, deleteItem} from "../ServerFacade"
 export default {
   name: "Account",
   data() {
     return {
-      folders: null,
+      folders: [],
       createNewFolderOverlay: false,
     };
   },
   async created() {
-    this.folders = [{folderId: 1, folderName: "folder1", folderContents: [{
-        itemName: "XFall 2021 - Winter 2022 - Google Drive",
-        itemIcon: "icons/arrow.png",
-        itemUrl: "https://en.wikipedia.org/wiki/Potato",
-      },
-      ]},]; 
-    
-    //TODO: call endpoint get all folders
+    let resp = await getFolders();
+
+    for (let i = 0; i < resp.folders.length; i++) {
+      //get folder items
+      let itemsResp = (await getItems(resp.folders[i][0])).user_items
+      let items = []
+      for (let j = 0; j < itemsResp.length; j++) {
+        items.push({itemName: itemsResp[j][2], itemUrl: itemsResp[j][3], itemIcon: itemsResp[j][4], itemId: itemsResp[j][0]})
+      }
+
+      //add to displayed list of folders
+      this.folders.push({folderId: resp.folders[i][0], folderName: resp.folders[i][2], folderContents: items});
+    }
   },
   methods: {
     revealFolderContents(folder) {
@@ -81,7 +87,7 @@ export default {
       //opens up option to create folder name
       this.createNewFolderOverlay = true;
     },
-    createFolder() {
+    async createFolder() {
       //collect entered folder name and create folder
       this.createNewFolderOverlay = false;
       const newFolderName = document.getElementById("name").value;
@@ -98,17 +104,27 @@ export default {
               itemName: tab.title,
               itemIcon: tab.favIconUrl,
               itemUrl: tab.url,
+              itemId: Date.now()
             });
 
           });
         });
       });
 
-      //TODO: call endpoint to create new folder
+      //call endpoint to create new folder
+      let newFolderId = await addFolder(newFolderName, Date.now());
+
+      if (newFolderId === -1) return;
+
+      //call endpoint to add each item to new folder
+      for (let i = 0; i < newFolderContents.length; i++) {
+        let item = newFolderContents[i];
+        await addItem(newFolderId, item.itemName, item.itemUrl, item.itemIcon)
+      }
 
       //update UI with new folder
       let newFolder = {
-        folderId: 23820, //Will be the id returned from the endpoint
+        folderId: newFolderId,
         folderName: newFolderName,
         folderContents: newFolderContents
       }
@@ -120,6 +136,26 @@ export default {
         chrome.tabs.create({
           url: folder.folderContents[i].itemUrl
         });
+      }
+    },
+    async deleteFolder(folder) {
+      let resp = await deleteFolder(folder.folderId);
+
+      for (let i = 0; i < folder.folderContents.length; i++) {
+        await deleteItem(folder.folderContents[i].itemId)
+      }
+      
+      if (resp === 1) {
+        //success, remove from UI
+        this.folders = this.folders.filter(f => f.folderId !== folder.folderId);
+      }
+    },
+    async deleteItem(folder, item) {
+      let resp = await deleteItem(item.itemId);
+
+      if (resp === 1) {
+        //success, remove from UI
+        folder.folderContents = folder.folderContents.filter(i => i.itemId !== item.itemId);
       }
     },
   }
@@ -174,15 +210,15 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  //justify-content: space-between;
+  //justify-content: space-around;
   //margin: 25px 10px;
-  padding: 10px;
-  width: 300px;
+  //padding: 10px;
+  width: 340px;
 }
 
 .folderRow h2 {
   overflow-wrap: break-word;
-  width: 150px;
+  width: 170px;
   text-align: start;
 }
 
