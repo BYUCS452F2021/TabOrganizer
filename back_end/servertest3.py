@@ -65,13 +65,13 @@ class AddItem(Resource):
         item_icon = json_data['ItemIcon']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""SELECT * FROM FOLDER WHERE FolderID=%s""",(folder_id))
+            cursor.execute("""SELECT * FROM FOLDER WHERE FolderID=%s""",(str(folder_id),))
             checkFolder = cursor.fetchone()
             if checkFolder is None:
                 print("Folder doesn't exist")
                 return -1
             else:
-                cursor.execute("""INSERT INTO ITEM(FolderID, ItemName, ItemUrl, ItemIcon) VALUES (%s, %s, %s, %s)""",(folder_id, item_name, item_url, item_icon))
+                cursor.execute("""INSERT INTO ITEM(FolderID, ItemName, ItemUrl, ItemIcon) VALUES (%s, %s, %s, %s)""",(str(folder_id), item_name, item_url, item_icon))
                 connection.commit()
                 cursor.execute("""SELECT last_insert_id()""")
                 userid = cursor.fetchone()
@@ -83,9 +83,9 @@ class GetItems(Resource):
         json_data = request.get_json(force=True)
         folder_id = json_data['FolderID']
         with connection.cursor() as cursor:
-            cursor.execute("""SELECT * FROM folder WHERE FOLDERID = """ + folder_id)
+            cursor.execute("""SELECT * FROM item WHERE FOLDERID = """ + str(folder_id))
             items = cursor.fetchall()
-            return {'user items': [i for i in items]}
+            return {'user_items': [i for i in items]}
 
 class DeleteItem(Resource):
     # Delete Item (remove item)
@@ -94,7 +94,7 @@ class DeleteItem(Resource):
         item_id = json_data['ItemID']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""DELETE FROM ITEM WHERE ItemID = """ + item_id)
+            cursor.execute("""DELETE FROM ITEM WHERE ItemID = """ + str(item_id))
             connection.commit()
             return 1
 
@@ -106,7 +106,7 @@ class UpdateItem(Resource):
         item_name = json_data['ItemName']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""UPDATE ITEM SET ItemName = %s WHERE ItemID = %s;""",(item_name, item_id))
+            cursor.execute("""UPDATE ITEM SET ItemName = %s WHERE ItemID = %s;""",(item_name, str(item_id)))
             connection.commit()
             return 1
 
@@ -122,7 +122,7 @@ class AddFolder(Resource):
         user_id = json_data['UserID']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""INSERT INTO folder(FolderName, DateUpdated, UserID) VALUES (%s, %s, %s)""",(folder_name, folder_updated, user_id))
+            cursor.execute("""INSERT INTO folder(FolderName, DateUpdated, UserID) VALUES (%s, %s, %s)""",(folder_name, folder_updated, str(user_id)))
             connection.commit()
             cursor.execute("""SELECT last_insert_id()""")
             folderid = cursor.fetchone()
@@ -135,7 +135,7 @@ class GetFolder(Resource):
         user_id = json_data['UserID']
         # get_user_folder_query = "" + UserID
         with connection.cursor() as cursor:
-            cursor.execute("""SELECT * FROM FOLDER WHERE USERID =""" + user_id)
+            cursor.execute("""SELECT * FROM FOLDER WHERE USERID =""" + str(user_id))
             folders = cursor.fetchall()
             return {'folders': [i for i in folders]}
 
@@ -146,7 +146,7 @@ class DeleteFolder(Resource):
         folder_id = json_data['FolderID']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""DELETE FROM folder WHERE FolderID=%s""",(folder_id,))
+            cursor.execute("""DELETE FROM folder WHERE FolderID=%s""",(str(folder_id),))
             connection.commit()
             return 1
 
@@ -159,7 +159,7 @@ class UpdateFolder(Resource):
         folder_name = json_data['FolderName']
 
         with connection.cursor(buffered=True) as cursor:
-            cursor.execute("""UPDATE folder SET FolderName = %s WHERE folderID = %s;""",(folder_name, folder_id))
+            cursor.execute("""UPDATE folder SET FolderName = %s WHERE folderID = %s;""",(folder_name, str(folder_id)))
             connection.commit()
             return 1
 
