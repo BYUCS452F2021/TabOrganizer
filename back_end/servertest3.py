@@ -12,10 +12,9 @@ api = Api(app)
 # https://www.codementor.io/@sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq
 connection = connect( host="localhost", user="root", password='', database="TabOrganizer")
 
-
-class User(Resource):
+class Login(Resource):
     # Login (returns userid if valid else returns -1)
-    def get(self):
+    def post(self):
         json_data = request.get_json(force=True)
         username = json_data['username']
         password = json_data['password']
@@ -32,6 +31,7 @@ class User(Resource):
             return checkUsername[0]
 
 
+class Register(Resource):
     # Add User (register, return userid)
     def post(self):
         json_data = request.get_json(force=True)
@@ -146,13 +146,14 @@ class Items(Resource):
             return {'items': [i for i in items]}
 
 # Make Paths
-api.add_resource(User, '/user') # Register and Login
+api.add_resource(Register, '/register') # Register
+api.add_resource(Login, '/login') # Login
 api.add_resource(Item, '/item') # Add item
 api.add_resource(DeleteItem, '/deleteitem') # Delete item
 api.add_resource(UpdateItem, '/updateitem') # Update item
 
-api.add_resource(UserFolders, '/userfolders/<UserID>') # currently doest work, use JSON instead
-api.add_resource(UserFolderItems, '/useritems/<UserID>') # currently doest work, use JSON instead
+api.add_resource(UserFolders, '/userfolders/<UserID>')
+api.add_resource(UserFolderItems, '/useritems/<UserID>')
 
 # For debugging
 api.add_resource(Users, '/users')
