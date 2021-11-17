@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import {addFolder, addItem, getFolders, getItems, deleteFolder, deleteItem} from "../ServerFacade"
+//import {addFolder, addItem, getFolders, getItems, deleteFolder, deleteItem} from "../ServerFacade"
 export default {
   name: "Account",
   data() {
@@ -57,19 +57,20 @@ export default {
     };
   },
   async created() {
-    let resp = await getFolders();
+    // let resp = await getFolders();
 
-    for (let i = 0; i < resp.folders.length; i++) {
-      //get folder items
-      let itemsResp = (await getItems(resp.folders[i][0])).user_items
-      let items = []
-      for (let j = 0; j < itemsResp.length; j++) {
-        items.push({itemName: itemsResp[j][2], itemUrl: itemsResp[j][3], itemIcon: itemsResp[j][4], itemId: itemsResp[j][0]})
-      }
+    // for (let i = 0; i < resp.folders.length; i++) {
+    //   //get folder items
+    //   let itemsResp = (await getItems(resp.folders[i][0])).user_items
+    //   let items = []
+    //   for (let j = 0; j < itemsResp.length; j++) {
+    //     items.push({itemName: itemsResp[j][2], itemUrl: itemsResp[j][3], itemIcon: itemsResp[j][4], itemId: itemsResp[j][0]})
+    //   }
 
       //add to displayed list of folders
-      this.folders.push({folderId: resp.folders[i][0], folderName: resp.folders[i][2], folderContents: items});
-    }
+      //this.folders.push({folderId: resp.folders[i][0], folderName: resp.folders[i][2], folderContents: items});
+      this.folders=[{folderId: 0, folderName: "test", folderContents: [{itemName: "Potato", itemUrl: "https://en.wikipedia.org/wiki/Potato", itemIcon: "", itemId: 0}]}];
+    //}
   },
   methods: {
     revealFolderContents(folder) {
@@ -112,19 +113,19 @@ export default {
       });
 
       //call endpoint to create new folder
-      let newFolderId = await addFolder(newFolderName, Date.now());
+      //let newFolderId = await addFolder(newFolderName, Date.now());
 
-      if (newFolderId === -1) return;
+      //if (newFolderId === -1) return;
 
       //call endpoint to add each item to new folder
-      for (let i = 0; i < newFolderContents.length; i++) {
-        let item = newFolderContents[i];
-        await addItem(newFolderId, item.itemName, item.itemUrl, item.itemIcon)
-      }
+      // for (let i = 0; i < newFolderContents.length; i++) {
+      //   let item = newFolderContents[i];
+      //   await addItem(newFolderId, item.itemName, item.itemUrl, item.itemIcon)
+      // }
 
       //update UI with new folder
       let newFolder = {
-        folderId: newFolderId,
+        folderId: Math.random(),//newFolderId,
         folderName: newFolderName,
         folderContents: newFolderContents
       }
@@ -139,24 +140,24 @@ export default {
       }
     },
     async deleteFolder(folder) {
-      let resp = await deleteFolder(folder.folderId);
+      //let resp = await deleteFolder(folder.folderId);
 
-      for (let i = 0; i < folder.folderContents.length; i++) {
-        await deleteItem(folder.folderContents[i].itemId)
-      }
+      // for (let i = 0; i < folder.folderContents.length; i++) {
+      //   await deleteItem(folder.folderContents[i].itemId)
+      // }
       
-      if (resp === 1) {
-        //success, remove from UI
+      // if (resp === 1) {
+      //   //success, remove from UI
         this.folders = this.folders.filter(f => f.folderId !== folder.folderId);
-      }
+      //}
     },
     async deleteItem(folder, item) {
-      let resp = await deleteItem(item.itemId);
+      //let resp = await deleteItem(item.itemId);
 
-      if (resp === 1) {
+      //if (resp === 1) {
         //success, remove from UI
         folder.folderContents = folder.folderContents.filter(i => i.itemId !== item.itemId);
-      }
+      //}
     },
   }
 };
