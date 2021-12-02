@@ -43,3 +43,67 @@ function openDb() {
       
     };
   }
+
+// cursor.execute("""INSERT INTO ITEM(FolderID, ItemName, ItemUrl, ItemIcon) VALUES (%s, %s, %s, %s)""",(folder_id, item_name, item_url, item_icon))               
+function addItem(folderIDRef, itemNameRef, itemUrlRef, itemIconRef)
+{
+    let item = {
+        id,
+        folderID: folderIDRef,
+        itemName : itemNameRef,
+        itemUrl : itemUrlRef,
+        itemIcon : itemIconRef
+    };
+
+    let tx = makeTX(DB_STORE_NAME, 'readwrite');
+    tx.oncomplete = (ev) => {
+    console.log(ev);
+    };
+
+    let store = tx.objectStore(DB_STORE_NAME);
+    let request = store.add(item);
+    
+    request.onsuccess = (ev) => {
+        console.log('successfully added an item object');
+    };
+    request.onerror = (err) => {
+        console.log('error in request to add');
+    };
+
+}
+
+
+//   cursor.execute("""INSERT INTO folder(FolderName, DateUpdated, UserID) VALUES (%s, %s, %s)""",(folder_name, folder_updated, user_id))
+function addFolder(nameRef, dateUpdatedRef)
+{
+    let folder = {
+        id,
+        name: nameRef,
+        dateUpdated : dateUpdatedRef
+    };
+
+    let tx = makeTX(DB_STORE_NAME, 'readwrite');
+    tx.oncomplete = (ev) => {
+      console.log(ev);
+    };
+
+    let store = tx.objectStore(DB_STORE_NAME);
+    let request = store.add(folder);
+    
+    request.onsuccess = (ev) => {
+        console.log('successfully added a folder object');
+      };
+      request.onerror = (err) => {
+        console.log('error in request to add');
+      };
+
+}
+
+
+function makeTransaction(storeName, mode) {
+    let tx = db.transaction(storeName, mode);
+    tx.onerror = (err) => {
+      console.warn(err);
+    };
+    return tx;
+  }
