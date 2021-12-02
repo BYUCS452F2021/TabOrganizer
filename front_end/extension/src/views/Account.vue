@@ -18,7 +18,25 @@
                 <strong>{{ item.itemName }}</strong>
                 <a :href="item.itemUrl">{{ item.itemUrl }}></a>
               </div>
-              <img src="icons/pen.png" class="item_pen" width="20" height="20">
+              <div class="edit_item">
+                <img src="icons/pen.png" class="item_pen" width="20" height="20" @click="editItem">
+              </div>
+              <div class="edit_item_overlay">
+                 <div class="editItemOverlay" v-show="createEditItemOverlay">
+                  <!-- <p>Edit item's name and url</p> -->
+                  <form id="editItemform">
+                    <div class="edit_field">
+                      <p>Type new name</p>
+                      <input type="text" id="newName" name="newName" />
+                      <p>Type new url</p>
+                      <input type="text" id="newURL" name="newURL">
+                    </div>
+                  </form>
+                  <div class="editButton" id="editButton" @click="editItemFolder">
+                    Edit
+                  </div>
+                 </div>                
+              </div>
               <img src="icons/trash.png" class="item_trash" width="20" height="20" @click="deleteItem(folder, item)">
             </div>
           </div>
@@ -54,6 +72,7 @@ export default {
     return {
       folders: [],
       createNewFolderOverlay: false,
+      createEditItemOverlay: false,
     };
   },
   async created() {
@@ -83,6 +102,16 @@ export default {
         //open
         document.getElementById("reveal_contents:" + folder.folderId).className = "rotate-down-arrow";
       }
+    },
+    editItem() {
+      this.createEditItemOverlay = true;
+    },
+    async editItemFolder() {
+      this.createEditItemOverlay = false;
+      // const newItemName = document.getElementById("newName").value;
+      // const newItemURL = document.getElementById("newURL").value;
+
+      document.getElementById("editItemform").reset();
     },
     addFolder() {
       //opens up option to create folder name
@@ -293,6 +322,23 @@ export default {
   box-shadow: 0.3em 0.3em 0.3em rgba(0, 0, 0, 0.7);
 }
 
+.editItemOverlay {
+  width: 250px;
+  height: 250px;
+  font-family: 'Architects Daughter', cursive;
+  text-align: center;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  position: absolute;
+  border: 2px;
+  border-color: black;
+  border-style: solid;
+  background-color: white;
+  font-size: 20px;
+  box-shadow: 0.3em 0.3em 0.3em rgba(0, 0, 0, 0.7);
+}
+
 form {
   color: #000000;
   font-weight: bold;
@@ -321,6 +367,25 @@ input {
   background: #899fa3;
   color: white;
 }
+
+
+.editButton {
+  background: lightblue;
+  text-align: center;
+  padding: 10px;
+  border-radius: 25px;
+  color: black;
+  width: 70px;
+  font-size: 15px;
+  margin-top: 15px;
+  margin-left: 31%;
+}
+
+.editButton:hover {
+  background: #899fa3;
+  color: white;
+}
+
 
 .folderIcon {
   float: left;
