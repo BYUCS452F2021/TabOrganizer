@@ -137,6 +137,21 @@ function getItems() {
 
 }
 
+function updateItem(itemIDRef, itemNameRef) {
+  let tx = db.transaction(DB_ITEM_STORE_NAME, "readwrite");
+  let store = tx.objectStore(DB_ITEM_STORE_NAME, "readwrite");
+  let key = store.get(itemIDRef);
+  let item = key.result;
+  item.itemName = itemNameRef;
+  let request = store.put(item);
+      request.onsuccess = (ev) => {
+        console.log('successfully updated an object');
+      };
+      request.onerror = (err) => {
+        console.log('error in request to update');
+      };
+}
+
 
 
 function makeTransaction(storeName, mode) {
