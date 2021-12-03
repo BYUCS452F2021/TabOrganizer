@@ -1,7 +1,8 @@
 
 const DB_NAME = 'TabOrganizedDB';
 const DB_VERSION = 1; // Use a long long for this value (don't use a float) //Use Versions to change structure of database or run onupgradeneeded()
-const DB_STORE_NAME = 'TabOrganizerStore';
+const DB_ITEM_STORE_NAME = 'TabOrganizerItemStore';
+const DB_FOLDER_STORE_NAME = 'TabOrganizerFolderStore';
 
 var db;
 
@@ -31,14 +32,17 @@ function openDb() {
       let newVersion = evt.newVersion || db.version;
       console.log('DB updated from version', oldVersion, 'to', newVersion);
 
-      if(!db.objectStoreNames.contains(TabOrganizerStore))
+      if(!db.objectStoreNames.contains(TabOrganizerItemStore) || !db.objectStoreNames.contains(TabOrganizerFolderStore))
       {
-        var store = evt.currentTarget.result.createObjectStore(
-            DB_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        var store_item = evt.currentTarget.result.createObjectStore(
+            DB_ITEM_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        var store_folder = evt.currentTarget.result.createObjectStore(
+          DB_FOLDER_STORE_NAME, { keyPath: 'id', autoIncrement: true });
 
-          store.createIndex('biblioid', 'biblioid', { unique: true });
-          store.createIndex('title', 'title', { unique: false });
-          store.createIndex('year', 'year', { unique: false });
+          //Gotta change these createIndex
+          // store.createIndex('biblioid', 'biblioid', { unique: true });
+          // store.createIndex('title', 'title', { unique: false });
+          // store.createIndex('year', 'year', { unique: false });
       }
 
     };
@@ -55,12 +59,12 @@ function addItem(folderIDRef, itemNameRef, itemUrlRef, itemIconRef)
         itemIcon : itemIconRef
     };
 
-    let tx = makeTX(DB_STORE_NAME, 'readwrite');
+    let tx = makeTX(DB_ITEM_STORE_NAME, 'readwrite');
     tx.oncomplete = (ev) => {
     console.log(ev);
     };
 
-    let store = tx.objectStore(DB_STORE_NAME);
+    let store = tx.objectStore(DB_ITEM_STORE_NAME);
     let request = store.add(item);
 
     request.onsuccess = (ev) => {
@@ -82,12 +86,12 @@ function addFolder(nameRef, dateUpdatedRef)
         dateUpdated : dateUpdatedRef
     };
 
-    let tx = makeTX(DB_STORE_NAME, 'readwrite');
+    let tx = makeTX(DB_FOLDER_STORE_NAME, 'readwrite');
     tx.oncomplete = (ev) => {
       console.log(ev);
     };
 
-    let store = tx.objectStore(DB_STORE_NAME);
+    let store = tx.objectStore(DB_FOLDER_STORE_NAME);
     let request = store.add(folder);
 
     request.onsuccess = (ev) => {
@@ -100,8 +104,8 @@ function addFolder(nameRef, dateUpdatedRef)
 }
 
 function getFolders() {
-  let tx = db.transaction(DB_STORE_NAME, "readonly");
-  let store = tx.objectStore(DB_STORE_NAME, "readonly");
+  let tx = db.transaction(DB_FOLDER_STORE_NAME, "readonly");
+  let store = tx.objectStore(DB_FOLDER_STORE_NAME, "readonly");
   let request = store.getAll();
 
   request.onsuccess = (ev) => {
@@ -117,8 +121,8 @@ function getFolders() {
 }
 
 function getItems() {
-  let tx = db.transaction(DB_STORE_NAME, "readonly");
-  let store = tx.objectStore(DB_STORE_NAME, "readonly");
+  let tx = db.transaction(DB_ITEM_STORE_NAME, "readonly");
+  let store = tx.objectStore(DB_ITEM_STORE_NAME, "readonly");
   let request = store.getAll();
 
   request.onsuccess = (ev) => {
