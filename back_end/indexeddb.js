@@ -12,7 +12,7 @@ var current_view_pub_key;
 function openDb() {
     console.log("openDb() ...");
     var req = indexedDB.open(DB_NAME, DB_VERSION);
-    
+
     //If Database opens corectly, triggers this hook
     req.onsuccess = function (evt) {
       // Equal to: db = req.result;
@@ -23,10 +23,10 @@ function openDb() {
       console.error("openDb():", evt.target.errorCode);
     };
 
-    //Anytime Version Number changes, triggers upgrade needed. 
+    //Anytime Version Number changes, triggers upgrade needed.
     req.onupgradeneeded = function (evt) {
       console.log("openDb.onupgradeneeded");
-      
+
       let oldVersion = evt.oldVersion;
       let newVersion = evt.newVersion || db.version;
       console.log('DB updated from version', oldVersion, 'to', newVersion);
@@ -35,16 +35,16 @@ function openDb() {
       {
         var store = evt.currentTarget.result.createObjectStore(
             DB_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-    
+
           store.createIndex('biblioid', 'biblioid', { unique: true });
           store.createIndex('title', 'title', { unique: false });
           store.createIndex('year', 'year', { unique: false });
       }
-      
+
     };
   }
 
-// cursor.execute("""INSERT INTO ITEM(FolderID, ItemName, ItemUrl, ItemIcon) VALUES (%s, %s, %s, %s)""",(folder_id, item_name, item_url, item_icon))               
+// cursor.execute("""INSERT INTO ITEM(FolderID, ItemName, ItemUrl, ItemIcon) VALUES (%s, %s, %s, %s)""",(folder_id, item_name, item_url, item_icon))
 function addItem(folderIDRef, itemNameRef, itemUrlRef, itemIconRef)
 {
     let item = {
@@ -62,7 +62,7 @@ function addItem(folderIDRef, itemNameRef, itemUrlRef, itemIconRef)
 
     let store = tx.objectStore(DB_STORE_NAME);
     let request = store.add(item);
-    
+
     request.onsuccess = (ev) => {
         console.log('successfully added an item object');
     };
@@ -89,13 +89,47 @@ function addFolder(nameRef, dateUpdatedRef)
 
     let store = tx.objectStore(DB_STORE_NAME);
     let request = store.add(folder);
-    
+
     request.onsuccess = (ev) => {
         console.log('successfully added a folder object');
       };
       request.onerror = (err) => {
         console.log('error in request to add');
       };
+
+}
+
+function getFolders() {
+  let tx = db.transaction(DB_STORE_NAME, "readonly");
+  let store = tx.objectStore(DB_STORE_NAME, "readonly");
+  let request = store.getAll();
+
+  request.onsuccess = (ev) => {
+    //getAll was successful
+    let request = ev.target; //request === getReq === ev.target
+    console.log({ request });
+    return request
+  };
+  request.onerror = (err) => {
+    console.warn(err);
+  };
+
+}
+
+function getItems() {
+  let tx = db.transaction(DB_STORE_NAME, "readonly");
+  let store = tx.objectStore(DB_STORE_NAME, "readonly");
+  let request = store.getAll();
+
+  request.onsuccess = (ev) => {
+    //getAll was successful
+    let request = ev.target; //request === getReq === ev.target
+    console.log({ request });
+    return request
+  };
+  request.onerror = (err) => {
+    console.warn(err);
+  };
 
 }
 
