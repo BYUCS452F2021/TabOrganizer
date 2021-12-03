@@ -134,6 +134,7 @@ function getItems() {
 }
 
 
+
 function makeTransaction(storeName, mode) {
     let tx = db.transaction(storeName, mode);
     tx.onerror = (err) => {
