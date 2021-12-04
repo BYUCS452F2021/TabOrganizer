@@ -123,6 +123,27 @@ export default {
 
       if(await updateItem(this.itemToEdit, this.folderIdToEdit, newItemName, newItemURL, icon)) {
         //TODO: update UI here
+        let folderIndexToEdit = -1;
+        for (let i = 0; i < this.folders.length; i++) {
+          if (this.folderIdToEdit == this.folders[i].folderId) {
+            folderIndexToEdit = i;
+            break;
+          }
+        }
+        //console.log("check: "+ folderIndexToEdit);
+
+        let itemIndexToEdit = -1;
+        for (let j = 0; j < this.folders[folderIndexToEdit].folderContents.length; j++) {
+           if (this.itemToEdit.itemId == this.folders[folderIndexToEdit].folderContents[j].itemId) {
+            itemIndexToEdit = j;
+            break;
+          }
+        }
+        console.log("check: "+ itemIndexToEdit);
+
+        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemName = newItemName;
+        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemUrl = newItemURL;
+        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemIcon = icon;
       }
 
       document.getElementById("editItemform").reset();
