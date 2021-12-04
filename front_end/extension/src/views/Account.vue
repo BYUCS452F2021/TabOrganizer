@@ -19,23 +19,7 @@
                 <a :href="item.itemUrl">{{ item.itemUrl }}></a>
               </div>
               <div class="edit_item">
-                <img src="icons/pen.png" class="item_pen" width="20" height="20" @click="editItem">
-              </div>
-              <div class="edit_item_overlay">
-                 <div class="editItemOverlay" v-show="createEditItemOverlay">
-                  <!-- <p>Edit item's name and url</p> -->
-                  <form id="editItemform">
-                    <div class="edit_field">
-                      <p>Type new name</p>
-                      <input type="text" id="newName" name="newName" />
-                      <p>Type new url</p>
-                      <input type="text" id="newURL" name="newURL">
-                    </div>
-                  </form>
-                  <div class="editButton" id="editButton" @click="editItemFolder">
-                    Edit
-                  </div>
-                 </div>                
+                <img src="icons/pen.png" class="item_pen" width="20" height="20" @click="editItem(folder.folderId, item)">
               </div>
               <img src="icons/trash.png" class="item_trash" width="20" height="20" @click="deleteItem(folder, item)">
             </div>
@@ -61,11 +45,28 @@
         </div>
     </div>
 
+    <div class="edit_item_overlay">
+      <div class="editItemOverlay" v-show="createEditItemOverlay">
+        <!-- <p>Edit item's name and url</p> -->
+        <form id="editItemform">
+          <div class="edit_field">
+            <p>Type new name</p>
+            <input type="text" id="newName" name="newName" />
+            <p>Type new url</p>
+            <input type="text" id="newURL" name="newURL">
+          </div>
+        </form>
+        <div class="editButton" id="editButton" @click="editItemFolder">
+          Edit
+        </div>
+      </div> 
+    </div>   
+
   </div>
 </template>
 
 <script>
-//import {addFolder, addItem, getFolders, getItems, deleteFolder, deleteItem} from "../ServerFacade"
+import { getFolders, getItems, addFolder, addItem, deleteFolder, deleteItem, updateItem } from "../indexeddb"
 export default {
   name: "Account",
   data() {
@@ -73,23 +74,26 @@ export default {
       folders: [],
       createNewFolderOverlay: false,
       createEditItemOverlay: false,
+      itemToEdit: null,
+      folderIdToEdit: null,
     };
   },
   async created() {
-    // let resp = await getFolders();
+    let resp = await getFolders();
 
-    // for (let i = 0; i < resp.folders.length; i++) {
-    //   //get folder items
-    //   let itemsResp = (await getItems(resp.folders[i][0])).user_items
-    //   let items = []
-    //   for (let j = 0; j < itemsResp.length; j++) {
-    //     items.push({itemName: itemsResp[j][2], itemUrl: itemsResp[j][3], itemIcon: itemsResp[j][4], itemId: itemsResp[j][0]})
-    //   }
+    for (let i = 0; i < resp.length; i++) {
+      //get folder items
+      let itemsResp = await getItems(resp[i].id)
+
+      let items = []
+      for (let j = 0; j < itemsResp.length; j++) {
+        items.push({itemName: itemsResp[j].itemName, itemUrl: itemsResp[j].itemUrl, itemIcon: itemsResp[j].itemIcon, itemId: itemsResp[j].id})
+      }
 
       //add to displayed list of folders
-      //this.folders.push({folderId: resp.folders[i][0], folderName: resp.folders[i][2], folderContents: items});
-      this.folders=[{folderId: 0, folderName: "test", folderContents: [{itemName: "Potato", itemUrl: "https://en.wikipedia.org/wiki/Potato", itemIcon: "", itemId: 0}]}];
-    //}
+      this.folders.push({folderId: resp[i].id, folderName: resp[i].name, folderContents: items});
+      //this.folders=[{folderId: 0, folderName: "test", folderContents: [{itemName: "Potato", itemUrl: "https://en.wikipedia.org/wiki/Potato", itemIcon: "", itemId: 0}]}];
+    }
   },
   methods: {
     revealFolderContents(folder) {
@@ -103,15 +107,26 @@ export default {
         document.getElementById("reveal_contents:" + folder.folderId).className = "rotate-down-arrow";
       }
     },
-    editItem() {
+    editItem(folderId, item) {
       this.createEditItemOverlay = true;
+      this.itemToEdit = item;
+      this.folderIdToEdit = folderId;
     },
     async editItemFolder() {
-      this.createEditItemOverlay = false;
-      // const newItemName = document.getElementById("newName").value;
-      // const newItemURL = document.getElementById("newURL").value;
+      const newItemName = document.getElementById("newName").value;
+      const newItemURL = document.getElementById("newURL").value;
+      let icon;
+      if(newItemURL) {
+        let domain = new URL(newItemURL)
+        icon = domain.protocol + "//" + domain.hostname + "/favicon.ico";
+      }
+
+      if(await updateItem(this.itemToEdit, this.folderIdToEdit, newItemName, newItemURL, icon)) {
+        //TODO: update UI here
+      }
 
       document.getElementById("editItemform").reset();
+      this.createEditItemOverlay = false;
     },
     addFolder() {
       //opens up option to create folder name
@@ -124,42 +139,58 @@ export default {
 
       document.getElementById("addFolderForm").reset();
 
-      let newFolderContents = [];
-
-      chrome.windows.getAll({populate:true},function(windows){
-        windows.forEach(function(window){
-          window.tabs.forEach(function(tab){
-
-            newFolderContents.push({
-              itemName: tab.title,
-              itemIcon: tab.favIconUrl,
-              itemUrl: tab.url,
-              itemId: Date.now()
-            });
-
-          });
-        });
-      });
-
       //call endpoint to create new folder
-      //let newFolderId = await addFolder(newFolderName, Date.now());
+      let newFolderId = await addFolder(newFolderName, Date.now());
 
-      //if (newFolderId === -1) return;
+      if (newFolderId === -1) return;
+
+      let newFolderContents = await this.getTabs();
 
       //call endpoint to add each item to new folder
-      // for (let i = 0; i < newFolderContents.length; i++) {
-      //   let item = newFolderContents[i];
-      //   await addItem(newFolderId, item.itemName, item.itemUrl, item.itemIcon)
-      // }
+      let indicesToRemove = []
+      for (let i = 0; i < newFolderContents.length; i++) {
+        let item = newFolderContents[i];
+        let newItemId = await addItem(newFolderId, item.itemName, item.itemUrl, item.itemIcon)
+        if (newItemId != -1) {
+          newFolderContents[i].itemId = newItemId;
+        } else {
+          indicesToRemove.push(i);
+        }
+      }
+
+      for(let i in indicesToRemove) {
+        newFolderContents.splice(i, 1);
+      }
 
       //update UI with new folder
       let newFolder = {
-        folderId: Math.random(),//newFolderId,
+        folderId: newFolderId,
         folderName: newFolderName,
         folderContents: newFolderContents
       }
 
       this.folders.push(newFolder)
+    },
+    async getTabs() {
+      let newFolderContents = [];
+      return new Promise(function(resolve) {
+        chrome.windows.getAll({populate:true},function(windows){
+          windows.forEach(function(window){
+            window.tabs.forEach(function(tab){
+
+              newFolderContents.push({
+                itemName: tab.title,
+                itemIcon: tab.favIconUrl,
+                itemUrl: tab.url,
+                itemId: Date.now() + Math.random()
+              });
+
+            });
+          });
+
+          return resolve(newFolderContents);
+        });
+      });
     },
     openFolder(folder) {
       for (let i = 0; i < folder.folderContents.length; i++) {
@@ -169,24 +200,20 @@ export default {
       }
     },
     async deleteFolder(folder) {
-      //let resp = await deleteFolder(folder.folderId);
-
-      // for (let i = 0; i < folder.folderContents.length; i++) {
-      //   await deleteItem(folder.folderContents[i].itemId)
-      // }
-      
-      // if (resp === 1) {
-      //   //success, remove from UI
+      if (await deleteFolder(folder.folderId)) {
+        for (let i = 0; i < folder.folderContents.length; i++) {
+          await deleteItem(folder.folderContents[i].itemId)
+        }
         this.folders = this.folders.filter(f => f.folderId !== folder.folderId);
-      //}
+      }
     },
     async deleteItem(folder, item) {
-      //let resp = await deleteItem(item.itemId);
+      let resp = await deleteItem(item.itemId);
 
-      //if (resp === 1) {
+      if (resp) {
         //success, remove from UI
         folder.folderContents = folder.folderContents.filter(i => i.itemId !== item.itemId);
-      //}
+      }
     },
   }
 };
