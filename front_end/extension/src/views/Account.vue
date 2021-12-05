@@ -92,7 +92,6 @@ export default {
 
       //add to displayed list of folders
       this.folders.push({folderId: resp[i].id, folderName: resp[i].name, folderContents: items});
-      //this.folders=[{folderId: 0, folderName: "test", folderContents: [{itemName: "Potato", itemUrl: "https://en.wikipedia.org/wiki/Potato", itemIcon: "", itemId: 0}]}];
     }
   },
   methods: {
@@ -122,7 +121,7 @@ export default {
       }
 
       if(await updateItem(this.itemToEdit, this.folderIdToEdit, newItemName, newItemURL, icon)) {
-        //TODO: update UI here
+
         let folderIndexToEdit = -1;
         for (let i = 0; i < this.folders.length; i++) {
           if (this.folderIdToEdit == this.folders[i].folderId) {
@@ -130,7 +129,6 @@ export default {
             break;
           }
         }
-        //console.log("check: "+ folderIndexToEdit);
 
         let itemIndexToEdit = -1;
         for (let j = 0; j < this.folders[folderIndexToEdit].folderContents.length; j++) {
@@ -139,11 +137,10 @@ export default {
             break;
           }
         }
-        console.log("check: "+ itemIndexToEdit);
 
-        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemName = newItemName;
-        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemUrl = newItemURL;
-        this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemIcon = icon;
+        if (newItemName) this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemName = newItemName;
+        if (newItemURL) this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemUrl = newItemURL;
+        if (icon) this.folders[folderIndexToEdit].folderContents[itemIndexToEdit].itemIcon = icon;
       }
 
       document.getElementById("editItemform").reset();

@@ -16,7 +16,6 @@ async function openDb() {
       req.onsuccess = function () {
         // Equal to: db = req.result;
         db = this.result;
-        console.log("openDb() DONE", db);
         return resolve(true);
       };
       req.onerror = function (evt) {
@@ -26,7 +25,6 @@ async function openDb() {
 
       //Anytime Version Number changes, triggers upgrade needed.
       req.onupgradeneeded = function (evt) {
-        console.log("openDb.onupgradeneeded");
 
         let oldVersion = evt.oldVersion;
         let newVersion = evt.newVersion || db.version;
@@ -134,14 +132,12 @@ export async function deleteFolder(folderId)
     return new Promise(function(resolve) {
       let request = store.delete(folderId);
       request.onsuccess = (ev) => {
-        console.log(ev);
-        console.log('successfully deleted a folder object');
+        console.log('successfully deleted a folder object', ev);
         db.close();
         return resolve(true);
       };
       request.onerror = (err) => {
-        console.log(err);
-        console.log('error in request to delete');
+        console.log('error in request to delete', err);
         db.close();
         return resolve(false);
       };
@@ -165,14 +161,12 @@ export async function deleteItem(itemId)
       let request = store.delete(itemId);
 
       request.onsuccess = (ev) => {
-          console.log(ev);
-          console.log('successfully deleted an item object');
+          console.log('successfully deleted an item object', ev);
           db.close();
           return resolve(true);
       };
       request.onerror = (err) => {
-        console.log(err);
-          console.log('error in request to delete');
+        console.log('error in request to delete', err);
           db.close();
           return resolve(false);
       };
@@ -249,14 +243,12 @@ export async function updateItem(itemObj, itemFolderIdRef, itemNameRef, itemUrlR
     return new Promise(function(resolve) {
       let request = store.put(item);
       request.onsuccess = (ev) => {
-        console.log(ev);
-        console.log('successfully updated an object');
+        console.log('successfully updated an object', ev);
         db.close();
         return resolve(true);
       };
       request.onerror = (err) => {
-        console.log(err);
-        console.log('error in request to update');
+        console.log('error in request to update', err);
         db.close();
         return resolve(false);
       };

@@ -4,14 +4,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  async created() {
-    this.$router.push("/account");
-  },
-};
-</script>
-
 <style>
 html {
   width: 400px;
